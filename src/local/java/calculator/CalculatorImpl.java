@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package local.java.calculator;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -23,6 +24,9 @@ public class CalculatorImpl {
 
     
     private String evaluatePolishNotation(ArrayList<String> temp_result) {
+        
+        CheckWithRegexp check = new CheckWithRegexp();
+                
         String result = null;
         String temp = null;
         BigDecimal a;
@@ -32,27 +36,33 @@ public class CalculatorImpl {
         do {
                  // Check for final result;
              if(temp_result.size() == 1) break;
+             
              temp = temp_result.get(i).toString();
-             if(Pattern.matches("[\\-\\+\\*\\/]", temp)) {
+             
+             if( check.isMathOperators(temp) ) {
+                 
                 b = new BigDecimal(temp_result.remove(i-1).toString());
                 a = new BigDecimal(temp_result.remove(i-2).toString());
-                if(Pattern.matches("\\+", temp)) {                
+                
+                if( check.isPlusOperator(temp) ) {                
                     temp_result.set(i-2, a.add(b).toString());
                     i = 0;
                 }
-                if(Pattern.matches("\\-", temp)) {
+                if( check.isMinusOperator(temp) ) {
                     temp_result.set(i-2, a.subtract(b).toString());
                     i = 0;
                 }
-                if(Pattern.matches("\\*", temp)) {                
+                if( check.isMultiplicationOperator(temp) ) {                
                     temp_result.set(i-2, a.multiply(b).toString());
                     i = 0;
                 }
-                if(Pattern.matches("\\/", temp)) {                
+                if( check.isDivisionOperator(temp) ) {                
                     temp_result.set(i-2, a.divide(b).toString());
                     i = 0;
                 }
+                
              } else i++;
+             
         } while(true);
             
         result = temp_result.get(0).toString();
@@ -149,10 +159,13 @@ public class CalculatorImpl {
     }
 
     private boolean checkCorrectStatement(String statement) {
+        
+        CheckWithRegexp check = new CheckWithRegexp();
+        
         boolean last_operator = false;
         boolean statement_is_correct = true;
-        int open_parentheses = 0;
-        int close_parentheses = 0;
+        int openingBracket = 0;
+        int closeBracket = 0;
         
         String temp;
         
@@ -164,19 +177,23 @@ public class CalculatorImpl {
                 break;
             }
                 //If in statement operators is one after another, then statement is not correct
-            if(Pattern.matches("[\\-\\+\\*\\/]", temp)) {
+            if( check.isMathOperators(temp) ) {
                 if(last_operator) statement_is_correct = false;
                 last_operator = true;
             } else {
                 last_operator = false;
             }
-            if(Pattern.matches("\\(", temp)) open_parentheses += 1 ;
-            if(Pattern.matches("\\)", temp)) close_parentheses += 1 ;
+            
+            if( check.isOpeningBracket(temp) ) openingBracket += 1 ;
+            if( check.isCloseBracket(temp) ) closeBracket += 1 ;
+            
         }
+        
             // If sum "(" != sum ")" statement is not correct
-        if(statement_is_correct && open_parentheses != close_parentheses ) {
+        if(statement_is_correct && openingBracket != closeBracket ) {
             statement_is_correct = false;
         }
+        
         return statement_is_correct;
     }
 }
